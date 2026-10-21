@@ -483,7 +483,7 @@ function viewAbout() {
     </div>
 
     <h3 class="about-h">Vos données</h3>
-    <p class="desc">Aucun compte, aucune inscription. Les podcasts que vous enregistrez restent <b>sur votre appareil</b> : ils ne sont envoyés nulle part, et disparaissent si vous effacez les données du site. Aucun traçage publicitaire, aucun profilage.</p>
+    <p class="desc">Aucun compte, aucune inscription. Les podcasts que vous enregistrez restent <b>sur votre appareil</b> : ils ne sont envoyés nulle part, et disparaissent si vous effacez les données du site. Aucun traçage publicitaire, aucun profilage. Le détail figure dans la <a href="https://www.lemeilleurdupodcast.ch/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
 
     <h3 class="about-h">Version</h3>
     <p class="desc">Application web installable, version 1. Fonctionne hors ligne une fois chargée. Sur iPhone : Partager, puis « Sur l'écran d'accueil ».</p>

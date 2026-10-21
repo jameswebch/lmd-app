@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Annuaire des podcasts suisses — Le Meilleur du Podcast</title>
+<meta name="description" content="1 294 podcasts suisses, 4 langues nationales. Écoutez, cherchez, enregistrez. Un annuaire du Meilleur du Podcast, réalisé par breew.com.">
+<meta name="theme-color" content="#C4161C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#/">
+    <img src="logo.png" alt="Le Meilleur du Podcast" width="40" height="40">
+    <span class="brand-txt"><b>Annuaire</b><i>des podcasts suisses</i></span>
+  </a>
+  <nav class="topnav">
+    <a href="#/" data-nav="home">Découvrir</a>
+    <a href="#/explore" data-nav="explore">Explorer</a>
+    <a href="#/favs" data-nav="favs">Enregistrés</a>
+  </nav>
+  <span class="byline">par <b>breew.com</b></span>
+</header>
+
+<main id="view" tabindex="-1"></main>
+
+<div id="player" class="player" hidden>
+  <div class="pl-bar" id="pl-bar" role="slider" aria-label="Position de lecture"><div class="pl-track"><div id="pl-fill"></div></div></div>
+  <img id="pl-cover" alt="" width="44" height="44">
+  <div class="pl-meta">
+    <b id="pl-title">—</b>
+    <span id="pl-pod"></span>
+  </div>
+  <button id="pl-back" class="icon-btn" aria-label="Reculer de 15 secondes">−15</button>
+  <button id="pl-toggle" class="play-btn big" aria-label="Lecture / pause">▶</button>
+  <button id="pl-fwd" class="icon-btn" aria-label="Avancer de 30 secondes">+30</button>
+  <span id="pl-time" class="pl-time">0:00</span>
+  <button id="pl-close" class="icon-btn close" aria-label="Fermer le lecteur">✕</button>
+  <audio id="audio" preload="none"></audio>
+</div>
+
+<nav class="tabbar">
+  <a href="#/" data-nav="home"><span>◆</span>Découvrir</a>
+  <a href="#/explore" data-nav="explore"><span>⌕</span>Explorer</a>
+  <a href="#/favs" data-nav="favs"><span>♡</span>Enregistrés</a>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>

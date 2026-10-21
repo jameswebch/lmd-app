@@ -305,6 +305,38 @@ function setNav(name) {
   $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === name));
 }
 
+function viewAbout() {
+  const d = state.data || {};
+  const maj = d.generated ? d.generated.split('-').reverse().join('.') : '';
+  const n = (d.count || 1294).toLocaleString('fr-CH');
+  return `<a class="back" href="#/">← Retour</a>
+  <section>
+    <div class="sec-head" style="margin-top:18px"><h2>À propos</h2></div>
+    <p class="desc">Cet annuaire recense <b>${n} podcasts suisses</b>, dans les quatre langues nationales. Il est né d'un constat simple : les podcasts de ce pays existent, mais on ne les trouve pas. Les plateformes internationales classent par popularité mondiale ; ici, on classe par langue et par thème, avec une place pour les récompensés du Prix Le Meilleur du Podcast.</p>
+
+    <h3 class="about-h">Qui édite</h3>
+    <p class="desc">Un projet de l'association <b>Le Meilleur De</b>, qui produit le podcast <i>Le Meilleur du Podcast</i> et son prix annuel. Réalisation technique : <b>breew.com</b>.</p>
+
+    <h3 class="about-h">D'où viennent les données</h3>
+    <p class="desc">Des flux RSS publics des podcasts et du catalogue d'Apple Podcasts : titres, descriptions, pochettes, épisodes. Les podcasts appartiennent à leurs producteurs. Cette application ne réhéberge aucun audio : la lecture se fait depuis le flux de chaque podcast, et chaque fiche renvoie vers son site.</p>
+    <p class="desc">Dernière mise à jour des données : <b>${esc(maj)}</b>.</p>
+
+    <h3 class="about-h">Une erreur, un retrait</h3>
+    <p class="desc">Une fiche inexacte, un podcast qui n'existe plus, une pochette à retirer ? Écrivez-nous, la correction est traitée à la main.</p>
+    <div class="actions" style="margin-top:6px">
+      <a class="btn" href="https://www.lemeilleurdupodcast.ch/contact/" target="_blank" rel="noopener">Formulaire de contact</a>
+      <a class="btn" href="https://www.lemeilleurdupodcast.ch/annuaire-podcasts-suisses/" target="_blank" rel="noopener">L'annuaire sur le web</a>
+    </div>
+
+    <h3 class="about-h">Vos données</h3>
+    <p class="desc">Aucun compte, aucune inscription. Les podcasts que vous enregistrez restent <b>sur votre appareil</b> : ils ne sont envoyés nulle part, et disparaissent si vous effacez les données du site. Aucun traçage publicitaire, aucun profilage.</p>
+
+    <h3 class="about-h">Version</h3>
+    <p class="desc">Application web installable, version 1. Fonctionne hors ligne une fois chargée. Sur iPhone : Partager, puis « Sur l'écran d'accueil ».</p>
+  </section>
+  <footer class="foot">Le Meilleur du Podcast — annuaire des podcasts suisses · <a href="https://breew.com" target="_blank" rel="noopener">breew.com</a></footer>`;
+}
+
 function render() {
   const hash = location.hash || '#/';
   const [, route, param] = hash.match(/^#\/([\w-]*)\/?(.*)$/) || [, '', ''];
@@ -312,6 +344,7 @@ function render() {
   if (route === 'p') { v.innerHTML = viewFiche(decodeURIComponent(param)); setNav('explore'); }
   else if (route === 'explore') { v.innerHTML = viewExplore(); setNav('explore'); }
   else if (route === 'favs') { v.innerHTML = viewFavs(); setNav('favs'); }
+  else if (route === 'about') { v.innerHTML = viewAbout(); setNav(''); }
   else { v.innerHTML = viewHome(); setNav('home'); }
   window.scrollTo(0, 0);
 }

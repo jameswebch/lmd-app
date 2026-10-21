@@ -1,4 +1,4 @@
-const CACHE = 'lmd-annuaire-v2';
+const CACHE = 'lmd-annuaire-v3';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'logo.png', 'manifest.webmanifest', 'icons/icon-192.png'];
 
 self.addEventListener('install', e => {

@@ -31,6 +31,11 @@ input,select,textarea{font:inherit;color:inherit;min-width:0;max-width:100%}
 .topnav a.on{border-color:var(--red);color:var(--red)}
 .byline{margin-left:auto;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .byline b{color:var(--ink)}
+.about-link{margin-left:auto;flex:0 0 auto;font-size:11px;letter-spacing:.04em;color:var(--muted);
+  text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 11px;
+  line-height:1;white-space:nowrap;transition:color .15s,border-color .15s}
+.about-link:hover,.about-link:focus-visible{color:var(--ink);border-color:var(--ink)}
+.about-h{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:22px 0 6px}
 @media(min-width:820px){ h2{font-size:13px} .top{padding:12px 28px} .topnav{display:flex} .byline{margin-left:8px} }
 
 /* ---------- layout ---------- */

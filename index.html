@@ -42,6 +42,27 @@
   <audio id="audio" preload="none"></audio>
 </div>
 
+<div id="fullplayer" class="fp" hidden role="dialog" aria-modal="true" aria-label="Lecteur">
+  <button id="fp-close" class="fp-close" aria-label="Réduire le lecteur">⌄</button>
+  <img id="fp-cover" class="fp-cover" alt="">
+  <div class="fp-meta">
+    <b id="fp-title">—</b>
+    <span id="fp-pod"></span>
+  </div>
+  <div class="fp-times"><span id="fp-cur">0:00</span><span id="fp-dur">0:00</span></div>
+  <input id="fp-seek" class="fp-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position de lecture">
+  <div class="fp-controls">
+    <button id="fp-back" class="icon-btn" aria-label="Reculer de 15 secondes">−15</button>
+    <button id="fp-toggle" class="play-btn big" aria-label="Lecture ou pause">▶</button>
+    <button id="fp-fwd" class="icon-btn" aria-label="Avancer de 30 secondes">+30</button>
+  </div>
+  <div class="fp-extra">
+    <button id="fp-rate" class="pill" aria-label="Vitesse de lecture">1×</button>
+    <button id="fp-sleep" class="pill" aria-label="Minuteur de sommeil">Minuteur</button>
+  </div>
+  <p id="fp-note" class="fp-note" aria-live="polite"></p>
+</div>
+
 <nav class="tabbar">
   <a href="#/" data-nav="home"><span>◆</span>Découvrir</a>
   <a href="#/explore" data-nav="explore"><span>⌕</span>Explorer</a>

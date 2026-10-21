@@ -35,10 +35,72 @@ const audioTime = s => {
 const audio = $('#audio');
 let currentEp = null;
 
+const POSKEY = 'lmd_positions_v1', RATEKEY = 'lmd_rate';
+const RATES = [1, 1.25, 1.5, 1.75, 2];
+
+const positions = () => { try { return JSON.parse(localStorage.getItem(POSKEY) || '{}'); } catch { return {}; } };
+function savedPosition(url) {
+  const p = positions()[url];
+  if (!p || !p.t || Date.now() - (p.at || 0) > 90 * 864e5) return 0;
+  if (p.d && p.t > p.d - 20) return 0;           // épisode terminé : on repart du début
+  return p.t > 10 ? p.t : 0;
+}
+function savePosition() {
+  if (!currentEp || !audio.duration) return;
+  const m = positions();
+  m[currentEp.url] = { t: Math.round(audio.currentTime), d: Math.round(audio.duration), at: Date.now() };
+  const keys = Object.keys(m);
+  if (keys.length > 80) keys.slice(0, keys.length - 80).forEach(k => delete m[k]);
+  try { localStorage.setItem(POSKEY, JSON.stringify(m)); } catch {}
+}
+
+let rate = RATES.includes(Number(localStorage.getItem(RATEKEY))) ? Number(localStorage.getItem(RATEKEY)) : 1;
+let sleepAt = 0, sleepTick = null;
+
+function applyRate() {
+  audio.playbackRate = rate;
+  const r = $('#fp-rate'); if (r) r.textContent = (rate === 1 ? '1' : String(rate).replace('.', ',')) + '×';
+  localStorage.setItem(RATEKEY, String(rate));
+}
+
+function nowPlayingState() {
+  if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+  if (!audio.duration) return;
+  try {
+    navigator.mediaSession.setPositionState({
+      duration: audio.duration,
+      playbackRate: audio.playbackRate,
+      position: Math.min(audio.currentTime, audio.duration),
+    });
+  } catch {}
+}
+
+function syncMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  const ms = navigator.mediaSession;
+  const on = (a, f) => { try { ms.setActionHandler(a, f); } catch {} };
+  on('play', () => audio.play().catch(() => {}));
+  on('pause', () => audio.pause());
+  on('stop', () => closePlayer());
+  on('seekbackward', d => { audio.currentTime = Math.max(0, audio.currentTime - (d.seekOffset || 15)); nowPlayingState(); });
+  on('seekforward', d => { audio.currentTime = Math.min(audio.duration || 1e9, audio.currentTime + (d.seekOffset || 30)); nowPlayingState(); });
+  on('seekto', d => { audio.currentTime = d.seekTime; nowPlayingState(); });
+}
+
 function playEpisode(btn) {
   const { url, title, pod, cover, link } = btn.dataset;
+  const resume = savedPosition(url);
   currentEp = { url, title, pod, cover, link };
   audio.src = url;
+  audio.playbackRate = rate;
+  audio.addEventListener('loadedmetadata', function once() {
+    audio.removeEventListener('loadedmetadata', once);
+    if (resume && resume < (audio.duration || 0) - 10) {
+      audio.currentTime = resume;
+      note('Reprise à ' + audioTime(resume));
+    }
+    nowPlayingState();
+  });
   audio.play().catch(() => {});
   $('#player').hidden = false;
   $('#pl-title').textContent = title;
@@ -46,33 +108,125 @@ function playEpisode(btn) {
   $('#pl-cover').src = cover || '';
   $('#pl-cover').onerror = () => { $('#pl-cover').style.visibility = 'hidden'; };
   $('#pl-cover').style.visibility = 'visible';
+  $('#fp-cover').src = cover || '';
+  $('#fp-title').textContent = title;
+  $('#fp-pod').textContent = pod;
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title, artist: pod, album: 'Annuaire des podcasts suisses',
       artwork: cover ? [{ src: cover, sizes: '600x600', type: 'image/jpeg' }] : [],
     });
-    navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
-    navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime = audio.currentTime + 30; });
   }
+  syncMediaSession();
+  applyRate();
+}
+
+function closePlayer() {
+  audio.pause();
+  savePosition();
+  audio.removeAttribute('src');
+  $('#player').hidden = true;
+  $('#fullplayer').hidden = true;
+  currentEp = null;
+  syncPlayIcons();
+}
+
+function note(t) {
+  const n = $('#fp-note');
+  if (!n) return;
+  n.textContent = t || '';
+  if (t) { clearTimeout(note._t); note._t = setTimeout(() => { n.textContent = ''; }, 3200); }
+}
+
+function openFull() {
+  if (!currentEp) return;
+  $('#fullplayer').hidden = false;
+  $('#fp-cover').src = currentEp.cover || '';
+  $('#fp-title').textContent = currentEp.title;
+  $('#fp-pod').textContent = currentEp.pod;
+  document.body.classList.add('fp-open');
 }
 
 function syncPlayIcons() {
   const playing = !audio.paused && !audio.ended;
   $$('[data-play]').forEach(b => { if (b.classList.contains('play-btn')) b.textContent = (currentEp && b.dataset.url === currentEp.url && playing) ? '❚❚' : '▶'; });
   $('#pl-toggle').textContent = playing ? '❚❚' : '▶';
+  const f = $('#fp-toggle'); if (f) f.textContent = playing ? '❚❚' : '▶';
 }
-audio.addEventListener('play', syncPlayIcons);
-audio.addEventListener('pause', syncPlayIcons);
-audio.addEventListener('ended', syncPlayIcons);
+
+audio.addEventListener('play', () => { syncPlayIcons(); nowPlayingState(); if (sleepTick) startSleepTick(); });
+audio.addEventListener('pause', () => { syncPlayIcons(); savePosition(); nowPlayingState(); });
+audio.addEventListener('ended', () => { syncPlayIcons(); savePosition(); });
+audio.addEventListener('ratechange', nowPlayingState);
+audio.addEventListener('seeked', nowPlayingState);
+
 $('#pl-toggle').onclick = () => { if (!audio.src) return; audio.paused ? audio.play() : audio.pause(); };
 $('#pl-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 15); };
 $('#pl-fwd').onclick = () => { audio.currentTime = audio.currentTime + 30; };
-$('#pl-close').onclick = () => { audio.pause(); audio.removeAttribute('src'); $('#player').hidden = true; currentEp = null; syncPlayIcons(); };
-audio.addEventListener('timeupdate', () => {
-  const d = audio.duration || 0;
-  $('#pl-fill').style.width = d ? `${(audio.currentTime / d) * 100}%` : '0%';
-  $('#pl-time').textContent = audioTime(audio.currentTime);
+$('#pl-close').onclick = closePlayer;
+
+$('#player').addEventListener('click', e => {
+  if (e.target.closest('button')) return;
+  openFull();
 });
+
+$('#fp-close').onclick = () => { $('#fullplayer').hidden = true; document.body.classList.remove('fp-open'); };
+$('#fp-toggle').onclick = () => { if (!audio.src) return; audio.paused ? audio.play() : audio.pause(); };
+$('#fp-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 15); };
+$('#fp-fwd').onclick = () => { audio.currentTime = audio.currentTime + 30; };
+$('#fp-seek').oninput = e => {
+  if (!audio.duration) return;
+  audio.currentTime = (Number(e.target.value) / 1000) * audio.duration;
+};
+$('#fp-rate').onclick = () => {
+  rate = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
+  applyRate();
+  note('Vitesse ' + (rate === 1 ? 'normale' : String(rate).replace('.', ',') + '×'));
+};
+$('#fp-sleep').onclick = () => {
+  const steps = [0, 15, 30, 45];
+  const cur = sleepAt ? Math.round((sleepAt - Date.now()) / 60000) : 0;
+  const next = steps.find(s => s > cur) ?? 0;
+  clearInterval(sleepTick); sleepTick = null;
+  if (!next) { sleepAt = 0; $('#fp-sleep').textContent = 'Minuteur'; note('Minuteur annulé'); return; }
+  sleepAt = Date.now() + next * 60000;
+  $('#fp-sleep').textContent = next + ' min';
+  note('Arrêt dans ' + next + ' minutes');
+  startSleepTick();
+};
+function startSleepTick() {
+  clearInterval(sleepTick);
+  sleepTick = setInterval(() => {
+    if (!sleepAt) { clearInterval(sleepTick); sleepTick = null; return; }
+    const left = sleepAt - Date.now();
+    if (left <= 0) {
+      audio.pause(); sleepAt = 0; clearInterval(sleepTick); sleepTick = null;
+      $('#fp-sleep').textContent = 'Minuteur'; note('Lecture arrêtée par le minuteur');
+    } else if (left < 60000) {
+      $('#fp-sleep').textContent = Math.ceil(left / 1000) + ' s';
+    }
+  }, 1000);
+}
+
+audio.addEventListener('timeupdate', () => {
+  const d = audio.duration || 0, t = audio.currentTime || 0;
+  $('#pl-fill').style.width = d ? `${(t / d) * 100}%` : '0%';
+  $('#pl-time').textContent = audioTime(t);
+  const fp = $('#fullplayer');
+  if (fp && !fp.hidden) {
+    $('#fp-cur').textContent = audioTime(t);
+    $('#fp-dur').textContent = audioTime(d);
+    const pct = d ? (t / d) * 100 : 0;
+    if (document.activeElement !== $('#fp-seek')) {
+      $('#fp-seek').value = Math.round(pct * 10);
+      $('#fp-seek').style.setProperty('--p', pct.toFixed(1) + '%');
+    }
+  }
+  if (Math.floor(t) % 5 === 0) savePosition();
+});
+window.addEventListener('pagehide', savePosition);
+document.addEventListener('visibilitychange', () => { if (document.hidden) savePosition(); });
+
 $('#pl-bar').addEventListener('click', e => {
   const r = $('.pl-track').getBoundingClientRect();
   if (audio.duration) audio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * audio.duration;

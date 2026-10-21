@@ -176,3 +176,33 @@ h1 em{font-style:normal;color:var(--red)}
 .tabbar a span{font-size:15px;line-height:1}
 .tabbar a.on{color:var(--red)}
 @media(min-width:820px){ .tabbar{display:none} body{padding-bottom:0} .player{bottom:24px} }
+
+/* ---------- lecteur plein écran ---------- */
+.fp{position:fixed;inset:0;z-index:80;background:var(--bg,#FBFAF7);display:flex;flex-direction:column;
+  justify-content:center;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 54px) 26px calc(env(safe-area-inset-bottom,0px) + 26px);
+  overflow-y:auto}
+.fp[hidden]{display:none}
+.fp-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:16px;background:none;border:0;
+  font-size:26px;line-height:1;color:var(--ink);padding:8px 12px;cursor:pointer}
+.fp-cover{width:min(78vw,320px);height:min(78vw,320px);object-fit:cover;border-radius:20px;
+  box-shadow:0 18px 40px rgba(0,0,0,.18);background:#e9e5dd;margin-top:10px}
+.fp-meta{text-align:center;margin:22px 0 4px;max-width:520px}
+.fp-meta b{display:block;font-size:19px;line-height:1.25;letter-spacing:-.01em}
+.fp-meta span{display:block;font-size:13px;color:var(--muted);margin-top:6px}
+.fp-times{display:flex;justify-content:space-between;width:100%;max-width:520px;font-size:11px;
+  color:var(--muted);font-variant-numeric:tabular-nums;margin-top:18px}
+.fp-seek{-webkit-appearance:none;appearance:none;width:100%;max-width:520px;height:4px;border-radius:999px;
+  background:linear-gradient(to right,var(--red) 0 var(--p,0%),var(--line) var(--p,0%) 100%);
+  outline:none;margin:8px 0 0}
+.fp-seek::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--red);border:0;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.fp-seek::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--red);border:0}
+.fp-controls{display:flex;align-items:center;gap:26px;margin:26px 0 10px}
+.fp-controls .play-btn.big{width:64px;height:64px;font-size:20px}
+.fp-controls .icon-btn{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  background:none;color:var(--ink);cursor:pointer}
+.fp-extra{display:flex;gap:10px;margin-top:14px}
+.fp-extra .pill{border:1px solid var(--line);border-radius:999px;background:none;padding:9px 16px;
+  font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;min-width:88px}
+.fp-note{min-height:18px;font-size:12px;color:var(--muted);margin-top:16px;text-align:center}
